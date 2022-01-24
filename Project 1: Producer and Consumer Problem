@@ -1,0 +1,82 @@
+//CST-315
+//1-23-2022
+//worked on by Jacob Silveira and Jose Castillo
+//Producer and Consumer Problem: This is a synchronization problem where the producer creates a value and stores it in the buffer and the consumer looks into the buffer to take out a value, the problem occurs when the values that have been produced and consumed are inconsistent.
+//In our case the buffer size is limited and not infinite and there is one producer and one consumer
+#include<stdio.h>
+#include<stdlib.h>
+
+//the buffer size is set up to 50
+int mutex=1, buffer_wait=0, buffer_empty=50, temp=0;
+//wait and signal functions for semaphores
+int full(int S)
+{
+  return (--S);
+}
+int empty(int S)
+{
+  return (++S);
+}
+//here the wait will decrement and the signal will increment
+
+
+//the producer function
+void producer()
+{
+  //mutex is set down to 0
+  mutex=full(mutex);
+  //here when a value is made the buffer size will decrease by 1 and the value will be placed in the buffer
+  buffer_wait=empty(buffer_wait);
+  buffer_empty=full(buffer_empty);
+  temp++;
+  printf("\nThe Producer created an item, count is:\n item-%d",temp); //print item count
+  mutex=empty(mutex);//mutex back to 1
+}
+
+
+//the consumer function
+void consumer()
+{
+  mutex=full(mutex);
+  //here when a value is consumed the buffer size will instead increase by 1 and a value will be removed from the buffer
+  buffer_wait=full(buffer_wait);
+  buffer_empty=empty(buffer_empty);
+  printf("\nThe Consumer consumed an item, count is:\n item-%d",temp); 
+  temp--;
+  mutex=empty(mutex);
+}
+
+
+//main
+int main()
+{
+  int option;
+  printf("\n1.Produce\n2.Consume\n3.Exit"); //print the users options
+  while(1)
+  {
+  printf("\nProduce or Consume?:"); //users option
+  scanf("%d",&option);
+  switch(option)
+  {
+  case 1:
+  //in option one we check if the buffer is full or not, if it is not full than the producer creates an item
+  if((mutex==1)&&(buffer_empty!=0))
+    producer();
+      else
+        printf("The Buffer has been filled"); //if the buffer reaches 50
+      break;
+  case 2:
+  //in option two we check if the buffer is empty or not, if not then the consumer will consume on item
+  if((mutex==1)&&(buffer_wait!=0))
+    consumer();//if not consume a item
+      else
+        printf("The buffer has been emptied");
+      break;
+  //option 3 exits the user from the program    
+  case 3:
+        exit(0);
+        break;
+    }
+  }
+  return 0;
+}
